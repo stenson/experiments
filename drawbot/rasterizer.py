@@ -1,5 +1,6 @@
 from random import random, randint
 
+# rasterization routine from the robofont docs
 def rasterize(glyph, cellSize=50, xMin=None, yMin=None, xMax=None, yMax=None):
     """
     Slice the glyph into a grid based on the given cell size.
@@ -50,6 +51,10 @@ def rasterize(glyph, cellSize=50, xMin=None, yMin=None, xMax=None, yMax=None):
         ySlice = ySlice + 1
     return bitmap
 
+#####################################
+############ ACTUAL CODE ############
+#####################################
+
 offset = (150, 50)
 fs = FormattedString()
 fs.font("Urushi v0.1")
@@ -59,21 +64,18 @@ bp = BezierPath()
 bp.text(fs, offset)
 fill(0)
 rect(0, 0, width(), height())
-fill(1, 1, 0, 0.5)
-#drawPath(bp)
 
-# rasterize the current glyph
-raster_size = 3
+raster_size = 4 # <<<<<<<<<<----------- edit this for big granular changes
 bitmap = rasterize(bp, raster_size)
 
 def randshift():
-    #return 0
     return randint(0, 2) - 1
 
 def draw_pixels():
     for y, line in enumerate(bitmap):
         for x, bit in enumerate(line):
             if bit:
+                # calculate a "score" for the y axis
                 yscore = 0
                 searching = True
                 py = y - 1
@@ -85,6 +87,7 @@ def draw_pixels():
                     else:
                         searching = False
                 
+                # calculate a "score" along the x axis
                 xscore = 0
                 searching = True
                 px = x - 1
@@ -96,14 +99,7 @@ def draw_pixels():
                     else:
                         searching = False
                 
-                #print(x, y, yscore, xscore)
-                
                 score = yscore + xscore
-                # draw = True
-                # if score == 0 or score == 1:
-                #     draw = random() < 0.2
-                # else:
-                #     draw = random() > (1/(score/6))
                 
                 if xscore < 4 or yscore < 4:
                     draw = random() > 0.9
@@ -119,7 +115,10 @@ def draw_pixels():
                     draw = random() > 0.7
                 
                 if draw:
-                    fill(1, 1, 1, pow(random(), 0.2)) #0.5 + pow(random(), 2)/0.5)
-                    oval(x * raster_size + offset[0] + 65 + randshift(), height() - (y * raster_size + offset[1]) - 18 + randshift(), raster_size + 1, raster_size + 1)
+                    fill(1, 1, 1, pow(random(), 0.2))
+                    diameter = raster_size + 1
+                    ox = x * raster_size + offset[0] + 65 + randshift()
+                    oy = height() - (y * raster_size + offset[1]) - 18 + randshift()
+                    oval(ox, oy, diameter, diameter)
 
 draw_pixels()
